@@ -149,6 +149,28 @@ class DataConnectionChecker {
 
     return _lastTryResults.map((result) => result.isSuccess).contains(true);
   }
+  
+  /// Initiates a request to specified address and port.
+  /// If at least one of the addresses is reachable
+  /// we assume an internet connection is available and return `true`.
+  /// `false` otherwise.
+  Future<bool> hasSpecifiedConnection(String internetAddress, int port) async {    
+    List<Future<AddressCheckResult>> requests = [];    
+
+    requests.add(
+      isHostReachable(
+        AddressCheckOptions(
+          InternetAddress(internetAddress),
+          port: port,
+          timeout: DEFAULT_TIMEOUT,
+        ),
+      ),
+    );
+
+    _lastTryResults = List.unmodifiable(await Future.wait(requests));
+
+    return _lastTryResults.map((result) => result.isSuccess).contains(true);
+  }
 
   /// Initiates a request to each address in [addresses].
   /// If at least one of the addresses is reachable
